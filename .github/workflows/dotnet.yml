@@ -1,0 +1,36 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: Restore dependencies
+      run: dotnet restore ./dotnet/
+    - name: Build
+      run: dotnet build --no-restore -c Release ./dotnet/
+    - name: Test
+      run: dotnet test --no-build --verbosity normal -c Release ./dotnet/
+    - name: Publish
+      run: dotnet pack ./dotnet/DeviceCheck.AppAttest -c Release -o pack --nologo
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v3.1.1
+      with:
+        name: Library_Package
+        path: /home/runner/work/DeviceCheck.AppAttest/DeviceCheck.AppAttest/pack/
+      
