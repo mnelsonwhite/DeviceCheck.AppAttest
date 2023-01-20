@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text;
 
-namespace DeviceCheck.AppAttest.Attestation;
+namespace DeviceCheck.AppAttest.Cbor;
 
 public static class CborSerializer
 {

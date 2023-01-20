@@ -1,4 +1,6 @@
-﻿[AttributeUsage(AttributeTargets.Property)]
+﻿namespace DeviceCheck.AppAttest.Cbor;
+
+[AttributeUsage(AttributeTargets.Property)]
 public class CborPropertyAttribute: Attribute
 {
 	public readonly object Name;

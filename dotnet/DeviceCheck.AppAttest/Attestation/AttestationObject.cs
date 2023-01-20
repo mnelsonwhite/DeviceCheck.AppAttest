@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using DeviceCheck.AppAttest.Cbor;
 
 namespace DeviceCheck.AppAttest.Attestation;
 

@@ -1,4 +1,6 @@
 ﻿
+using DeviceCheck.AppAttest.Cbor;
+
 namespace DeviceCheck.AppAttest.Attestation;
 
 internal class CredentialPublicKey

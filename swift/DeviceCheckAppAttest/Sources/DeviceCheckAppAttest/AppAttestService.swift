@@ -110,7 +110,9 @@ public class AppAttestService: AppAttestProtocol
         let attestation = try await generateAttestation(keyId: keyId, challenge: challenge)
         
         var request = URLRequest(url: attestationUrl)
-        request.setValue("\(NSURLAuthenticationMethodAppAttest) key-id=\(try keyId.percentEncode()) corr-id=\(try correlationId.percentEncode()) attest=\(try attestation.base64Encode().percentEncode())", forHTTPHeaderField: "Authorization")
+        request.setValue(
+            "\(NSURLAuthenticationMethodAppAttest) key-id=\(try keyId.percentEncode()) corr-id=\(try correlationId.percentEncode()) attest=\(try attestation.base64Encode().percentEncode())", forHTTPHeaderField: "Authorization"
+        )
         request.httpMethod = "POST"
         
         return request

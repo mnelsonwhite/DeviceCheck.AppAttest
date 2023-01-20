@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Remove="Microsoft.Extensions.Logging.Abstractions" />
     <None Remove="System.Formats.Cbor" />
+    <None Remove="Cbor\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">
@@ -36,5 +37,8 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Cbor\" />
   </ItemGroup>
 </Project>

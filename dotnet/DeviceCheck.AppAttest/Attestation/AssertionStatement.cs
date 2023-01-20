@@ -1,4 +1,6 @@
-﻿namespace DeviceCheck.AppAttest.Attestation;
+﻿using DeviceCheck.AppAttest.Cbor;
+
+namespace DeviceCheck.AppAttest.Attestation;
 
 [CborMap(typeof(string))]
 internal class AssertionStatement

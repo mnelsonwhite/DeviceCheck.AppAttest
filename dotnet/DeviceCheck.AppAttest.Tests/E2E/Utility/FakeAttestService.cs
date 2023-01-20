@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Dahomey.Cbor;
 using DeviceCheck.AppAttest.Attestation;
 
 namespace DeviceCheck.AppAttest.Tests.E2E.Utility;
@@ -214,10 +213,11 @@ internal class FakeAttestService
             )
             .Build();
 
-        var nonce = await new SHA256HashBuilder()
+        var nonce = new DataBuilder()
             .Add(authData.AsSpan())
             .Add(SHA256.HashData(challenge))
-            .Build();
+            .Build()
+            .SHA256Hash();
 
         var credCert = GetCredCert(nonce, key);
 
@@ -236,7 +236,7 @@ internal class FakeAttestService
         };
 
         using var stream = new MemoryStream();
-        await Cbor.SerializeAsync(statement, stream);
+        await Dahomey.Cbor.Cbor.SerializeAsync(statement, stream);
 
         return (stream.ToArray(), credCert);
     }
@@ -317,13 +317,14 @@ internal class FakeAttestService
             )
             .Build();
 
-        var nonce = await new SHA256HashBuilder()
+        var nonce = new DataBuilder()
             .Add(authData)
             .Add(clientDataHash)
-            .Build();
+            .Build()
+            .SHA256Hash();
 
         using var stream = new MemoryStream();
-        await Cbor.SerializeAsync(
+        await Dahomey.Cbor.Cbor.SerializeAsync(
             new {
                 signature = key.SignData(nonce, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1),
                 authenticatorData = authData

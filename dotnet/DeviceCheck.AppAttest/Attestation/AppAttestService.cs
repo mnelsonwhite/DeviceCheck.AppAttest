@@ -9,6 +9,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Formats.Asn1;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using DeviceCheck.AppAttest.Cbor;
 
 namespace DeviceCheck.AppAttest.Attestation;
 
@@ -127,10 +128,11 @@ internal class AppAttestService : IAppAttestService
             throw new AssertionException(nameof(assertion.Signature));
         }
 
-        var nonce = await new SHA256HashBuilder()
+        var nonce = new DataBuilder()
             .Add(assertion.AuthenticatorData)
             .Add(clientDataHash)
-            .Build();
+            .Build()
+            .SHA256Hash();
 
         // Step 3
         var credCert = attestationData.GetCredCert();
