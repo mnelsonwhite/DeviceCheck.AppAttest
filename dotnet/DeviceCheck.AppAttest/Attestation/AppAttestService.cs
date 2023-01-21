@@ -35,13 +35,12 @@ internal class AppAttestService : IAppAttestService
         }
 
         // Step 2
-        var challengeHash = SHA256.HashData(challenge);
-        var clientDataHash = new byte[challengeHash.Length + attestation.AuthData.Length];
-        attestation.AuthData.CopyTo(clientDataHash, 0);
-        challengeHash.CopyTo(clientDataHash, attestation.AuthData.Length);
-
         // Step 3
-        var nonce = SHA256.HashData(clientDataHash);
+        var nonce = new DataBuilder()
+            .Add(attestation.AuthData)
+            .Add(SHA256.HashData(challenge))
+            .Build()
+            .SHA256Hash();
 
         // Step 4
         var credCertOctString = AsnDecoder.ReadOctetString(

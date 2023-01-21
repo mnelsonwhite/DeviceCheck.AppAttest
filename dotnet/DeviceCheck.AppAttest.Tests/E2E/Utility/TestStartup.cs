@@ -23,11 +23,14 @@ public class TestStartup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddAuthentication().AddAppAttest(options => {
-            options.RootCertificatePem = FakeAttestService.PublicRootCertificatePem;
-            options.ChallengeLength = ChallengeLength;
-            options.AppId = AppId;
-        });
+        services.AddAuthentication().AddAppAttest(
+            Configuration,
+            options: options => {
+                options.RootCertificatePem = FakeAttestService.PublicRootCertificatePem;
+                options.ChallengeLength = ChallengeLength;
+                options.AppId = AppId;
+            }
+        );
         services.AddAuthorization();
         services.AddControllers();
         services.AddLogging();

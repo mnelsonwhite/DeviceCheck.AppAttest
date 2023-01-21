@@ -39,6 +39,21 @@ public class AppAttestAuthOptions : AuthenticationSchemeOptions
     public string? AppId { get; set; }
     public string AttestationPath { get; set; }
 
+    private Type _cacheProviderType = typeof(MemoryCacheProvider);
+    public Type CacheProviderType
+    {
+        get => _cacheProviderType;
+        set
+        {
+            if (value.IsAssignableTo(typeof(ICacheProvider)))
+            {
+                throw new InvalidCastException("CacheProviderType must implement ICacheProvider");
+            }
+
+            _cacheProviderType = value;
+        }
+    }
+
     public AppAttestAuthOptions()
     {
         ChallengeLength = 64;

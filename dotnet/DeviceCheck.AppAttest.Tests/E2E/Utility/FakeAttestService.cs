@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using DeviceCheck.AppAttest.Attestation;
+using DeviceCheck.AppAttest.Extensions;
 
 namespace DeviceCheck.AppAttest.Tests.E2E.Utility;
 
@@ -230,7 +231,7 @@ internal class FakeAttestService
                     credCert.GetRawCertData(),
                     _intermediate.GetRawCertData()
                 },
-                receipt = new byte[] { }
+                receipt = Array.Empty<byte>()
             },
             authData = authData
         };

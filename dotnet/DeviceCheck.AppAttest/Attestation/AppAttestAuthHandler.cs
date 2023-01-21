@@ -109,9 +109,6 @@ public class AppAttestAuthHandler : AuthenticationHandler<AppAttestAuthOptions>
             Options.ChallengeTtl
         );
 
-
-        //new Uri(Request.Host.Value, Options.AttestationPath);
-        
         var uri = new Uri(new Uri(Request.GetEncodedUrl()), Options.AttestationPath);
 
         Response.Headers["WWW-Authenticate"]

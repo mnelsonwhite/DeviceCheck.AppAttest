@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 namespace DeviceCheck.AppAttest.Extensions;
 
@@ -17,5 +18,10 @@ internal static class ByteArrayExtensions
             handle.Free();
         }
         return structVal;
+    }
+
+    public static byte[] SHA256Hash(this byte[] bytes)
+    {
+        return SHA256.HashData(bytes);
     }
 }
