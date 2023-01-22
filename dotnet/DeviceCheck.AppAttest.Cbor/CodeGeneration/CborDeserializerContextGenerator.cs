@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics.CodeAnalysis;
 
-namespace DeviceCheck.AppAttest.Cbor;
+namespace DeviceCheck.AppAttest.Cbor.CodeGeneration;
 
 [Generator]
 public class CborDeserializerContextGenerator: ISourceGenerator
@@ -90,102 +88,5 @@ public class CborDeserializerContextGenerator: ISourceGenerator
     public void Initialize(GeneratorInitializationContext context)
     {
         context.RegisterForSyntaxNotifications(() => new SyntaxReceiver());
-    }
-}
-
-class SyntaxReceiver : ISyntaxReceiver
-{
-    public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
-    {
-        if (!syntaxNode.TryGetNamespaceName(out var namespaceName)
-            || !syntaxNode.TryGetParent<ClassDeclarationSyntax>(out var classSyntax)
-            || !classSyntax.Modifiers.Any(v => v is SyntaxToken st && st.Text == "partial"))
-        {
-            return;
-        }
-
-        var className = classSyntax.Identifier.Text;
-        var fullClassName = $"{namespaceName}.{className}";
-
-        if (syntaxNode is AttributeSyntax {
-                Name: IdentifierNameSyntax { Identifier.Text: "CborMap"}
-            } mapAttr
-        ) {
-            var keyType = (mapAttr.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.ValueText
-                ?? "typeof(string)";
-
-            var modifiers = String.Join(" ", classSyntax.Modifiers.Select(v => v.Text));
-            Classes.Add(new TargetClass(className, namespaceName, keyType, modifiers));
-        }
-
-        if (syntaxNode is AttributeSyntax {
-                Name: IdentifierNameSyntax { Identifier.Text: "CborProperty" }
-            } propAttr
-            && propAttr.TryGetParent<PropertyDeclarationSyntax>(out var propSyntax)
-        ) {
-            if (!Props.ContainsKey(fullClassName))
-            {
-                Props[fullClassName] = new List<TargetProp>();
-            }
-
-            var keyValue = (propAttr.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.ToString()
-            ?? $"\"{propSyntax.Identifier.Text}\"";
-
-            var typeValue = propSyntax.Type is NullableTypeSyntax nt ? nt.ElementType.ToString() : propSyntax.Type.ToString();
-
-            Props[fullClassName].Add(new TargetProp(
-                keyValue,
-                typeValue,
-                propSyntax.Identifier.Text
-            ));
-        }
-    }
-
-    public record TargetClass(string className, string namespaceName, string keyType, string modifiers);
-    public record TargetProp(string keyValue, string propertyType, string propertyName);
-    public readonly List<TargetClass> Classes = new List<TargetClass>();
-    public readonly Dictionary<string, List<TargetProp>> Props = new Dictionary<string, List<TargetProp>>();
-}
-
-static class SyntaxNodeExtensions
-{
-    public static bool TryGetParent<T>(
-        this SyntaxNode node,
-        [NotNullWhen(returnValue: true)] out T? parent
-    ) where T: SyntaxNode
-    {
-        var nparent = node.Parent;
-        while (nparent is not null)
-        {
-            if (nparent is T t) {
-                parent = t;
-                return true;
-            }
-
-            nparent = nparent.Parent;
-        }
-
-        parent = default;
-        return false;
-    }
-
-    public static bool TryGetNamespaceName(
-        this SyntaxNode node,
-        [NotNullWhen(returnValue:true)] out string? namespaceName)
-    {
-        if(node.TryGetParent<NamespaceDeclarationSyntax>(out var namespaceSyntax))
-        {
-            namespaceName = namespaceSyntax.Name.ToString();
-            return true;
-        }
-
-        if(node.TryGetParent<FileScopedNamespaceDeclarationSyntax>(out var fileScopedNamespaceSyntax))
-        {
-            namespaceName = fileScopedNamespaceSyntax.Name.ToString();
-            return true;
-        }
-
-        namespaceName = default;
-        return false;
     }
 }
