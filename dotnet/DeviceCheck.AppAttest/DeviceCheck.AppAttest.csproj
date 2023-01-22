@@ -17,7 +17,6 @@
   <ItemGroup>
     <None Remove="Microsoft.Extensions.Logging.Abstractions" />
     <None Remove="System.Formats.Cbor" />
-    <None Remove="Cbor\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">
@@ -39,6 +38,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Cbor\" />
+    <ProjectReference Include="..\DeviceCheck.AppAttest.Cbor\DeviceCheck.AppAttest.Cbor.csproj" OutputItemType="Analyzer" />
   </ItemGroup>
 </Project>

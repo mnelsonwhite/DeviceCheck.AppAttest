@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DeviceCheck.AppAttest.Cbor;
 
-public static class CborSerializer
+public static class Cbor
 {
 	public static T? Deserialize<T>(
 		ReadOnlyMemory<byte> data,
@@ -19,13 +19,49 @@ public static class CborSerializer
 		return (T?) GetValue(reader, typeof(T));
 	}
 
-	private static object? GetMap(CborReader reader, Type type)
+	private static object GetMap(
+		CborReader reader,
+		ICborSerializerContext context,
+		object obj)
+	{
+		var keyType = context.GetKeyType();
+
+		reader.ReadStartMap();
+		while(reader.PeekState() != CborReaderState.EndMap)
+		{
+			var state = reader.PeekState();
+
+			if (state != CborReaderState.TextString)
+			{
+				throw new InvalidOperationException("Expected map key");
+			}
+
+			var key = GetValue(reader, keyType)
+				?? throw new InvalidOperationException("Unable to read key");
+
+			if (context.TryGetPropertyType(key, out var type))
+			{
+				context.SetProperty(key, GetValue(reader, type), obj);
+			}
+		}
+
+		reader.ReadEndMap();
+
+		return obj;
+	}
+
+    private static object? GetMap(CborReader reader, Type type)
 	{
 		var obj = Activator.CreateInstance(type);
 
         if (obj is null)
 		{
 			return null;
+		}
+
+		if (obj is ICborSerializerContext context)
+		{
+			return GetMap(reader, context, obj);
 		}
 
 		var properties = type

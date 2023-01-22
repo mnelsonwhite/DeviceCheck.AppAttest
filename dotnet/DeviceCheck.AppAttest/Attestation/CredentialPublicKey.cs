@@ -3,7 +3,8 @@ using DeviceCheck.AppAttest.Cbor;
 
 namespace DeviceCheck.AppAttest.Attestation;
 
-internal class CredentialPublicKey
+//[CborMap(typeof(int))]
+internal partial class CredentialPublicKey
 {
     [CborProperty("kty")]
     public string? Kty { get; set; }

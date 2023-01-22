@@ -9,4 +9,9 @@ public class CborMapAttribute: Attribute
 	{
 		KeyType = keyType;
     }
+
+	public CborMapAttribute()
+	{
+		KeyType = typeof(string);
+	}
 }

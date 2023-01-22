@@ -24,7 +24,7 @@ internal class AppAttestService : IAppAttestService
         string appId,
         X509Certificate2 rootCertificate)
     {
-        var attestation = CborSerializer.Deserialize<AttestationObject>(attestationData)
+        var attestation = Cbor.Cbor.Deserialize<AttestationObject>(attestationData)
             ?? throw new AttestationException("Unable to deserialize");
 
         // Step 1
@@ -114,7 +114,7 @@ internal class AppAttestService : IAppAttestService
         await SHA256.HashDataAsync(clientDataStream, clientDataHash);
 
         // Step 2
-        var assertion = CborSerializer.Deserialize<AssertionStatement>(assertionStatement)
+        var assertion = Cbor.Cbor.Deserialize<AssertionStatement>(assertionStatement)
             ?? throw new AssertionException("Unable to deserialize");
 
         if (assertion.AuthenticatorData is null)

@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceCheck.AppAttest.Tests", "DeviceCheck.AppAttest.Tests\DeviceCheck.AppAttest.Tests.csproj", "{37382047-41CC-43B1-B9D9-D117492C40FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceCheck.AppAttest.Cbor", "DeviceCheck.AppAttest.Cbor\DeviceCheck.AppAttest.Cbor.csproj", "{60D4EE9A-123D-430F-87FD-2BECE2E690C7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeviceCheck.AppAttest.Cbor.Tests", "DeviceCheck.AppAttest.Cbor.Tests\DeviceCheck.AppAttest.Cbor.Tests.csproj", "{1EA59679-A771-4BCD-8859-14FC4396BF83}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{37382047-41CC-43B1-B9D9-D117492C40FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37382047-41CC-43B1-B9D9-D117492C40FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37382047-41CC-43B1-B9D9-D117492C40FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60D4EE9A-123D-430F-87FD-2BECE2E690C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60D4EE9A-123D-430F-87FD-2BECE2E690C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60D4EE9A-123D-430F-87FD-2BECE2E690C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60D4EE9A-123D-430F-87FD-2BECE2E690C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EA59679-A771-4BCD-8859-14FC4396BF83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EA59679-A771-4BCD-8859-14FC4396BF83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EA59679-A771-4BCD-8859-14FC4396BF83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EA59679-A771-4BCD-8859-14FC4396BF83}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

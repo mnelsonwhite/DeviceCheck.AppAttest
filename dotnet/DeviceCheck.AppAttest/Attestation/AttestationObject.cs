@@ -3,7 +3,8 @@ using DeviceCheck.AppAttest.Cbor;
 
 namespace DeviceCheck.AppAttest.Attestation;
 
-internal class AttestationObject
+[CborMap]
+internal partial class AttestationObject
 {
     [CborProperty("fmt")]
     public string Format { get; set; } = default!;

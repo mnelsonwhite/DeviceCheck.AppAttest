@@ -2,8 +2,8 @@
 
 namespace DeviceCheck.AppAttest.Attestation;
 
-[CborMap(typeof(string))]
-internal class AssertionStatement
+[CborMap]
+internal partial class AssertionStatement
 {
     [CborProperty("signature")]
     public byte[]? Signature { get; set; }
