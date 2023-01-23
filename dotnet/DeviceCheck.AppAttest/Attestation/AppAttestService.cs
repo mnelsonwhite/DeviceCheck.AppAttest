@@ -141,7 +141,7 @@ internal class AppAttestService : IAppAttestService
             HashAlgorithmName.SHA256
         ))
         {
-            throw new AssertionException(nameof(assertion.AuthenticatorData));
+            throw new AssertionException(nameof(assertion.Signature));
         }
 
         // Step 4
