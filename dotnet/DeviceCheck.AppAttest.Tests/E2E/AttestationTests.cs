@@ -2,16 +2,8 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography.Xml;
-using System.Security.Policy;
-using System.Text;
-using System.Text.Json;
-using System.Threading;
 using System.Web;
 using DeviceCheck.AppAttest.Attestation;
-using DeviceCheck.AppAttest.Cache;
-using DeviceCheck.AppAttest.Extensions;
 using DeviceCheck.AppAttest.Tests.E2E.Utility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

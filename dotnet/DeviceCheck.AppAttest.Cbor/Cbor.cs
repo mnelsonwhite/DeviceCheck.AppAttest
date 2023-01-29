@@ -8,7 +8,7 @@ public static class Cbor
 {
 	public static T? Deserialize<T>(
 		ReadOnlyMemory<byte> data,
-		CborConformanceMode mode = CborConformanceMode.Lax) where T: new()
+		CborConformanceMode mode = CborConformanceMode.Strict) where T: new()
 	{
 		var reader = new CborReader(data, mode);
 		return GetValue<T>(reader);
@@ -25,28 +25,21 @@ public static class Cbor
 		object obj)
 	{
 		var keyType = context.GetKeyType();
-
 		reader.ReadStartMap();
-		while(reader.PeekState() != CborReaderState.EndMap)
-		{
-			var state = reader.PeekState();
 
-			if (state != CborReaderState.TextString)
-			{
-				throw new InvalidOperationException("Expected map key");
-			}
+        while (reader.PeekState() != CborReaderState.EndMap)
+        {
+            var key = GetValue(reader, keyType)
+                ?? throw new InvalidOperationException("Unable to read key");
 
-			var key = GetValue(reader, keyType)
-				?? throw new InvalidOperationException("Unable to read key");
+            if (context.TryGetPropertyType(key, out var type))
+            {
+                context.SetProperty(key, GetValue(reader, type), obj);
+            }
+        }
 
-			if (context.TryGetPropertyType(key, out var type))
-			{
-				context.SetProperty(key, GetValue(reader, type), obj);
-			}
-		}
-
-		reader.ReadEndMap();
-
+        reader.ReadEndMap();
+		
 		return obj;
 	}
 
@@ -79,71 +72,109 @@ public static class Cbor
 			.ToDictionary(v => v.Name, v => v.Property);
 
 		var keyType = type.GetCustomAttribute<CborMapAttribute>()?.KeyType ?? typeof(string);
-
 		reader.ReadStartMap();
-		while(reader.PeekState() != CborReaderState.EndMap)
-		{
-			var state = reader.PeekState();
 
-			if (state != CborReaderState.TextString)
-			{
-				throw new InvalidOperationException("Expected map key");
-			}
-
-			var key = GetValue(reader, keyType)
-				?? throw new InvalidOperationException("Unable to read key");
+		while (reader.PeekState() != CborReaderState.EndMap)
+        {
+            var key = GetValue(reader, keyType)
+                ?? throw new InvalidOperationException("Unable to read key");
 
             if (properties.TryGetValue(key, out var property))
-			{
-				property.SetValue(obj, GetValue(reader, property.PropertyType));
+            {
+                property.SetValue(obj, GetValue(reader, property.PropertyType));
             }
         }
 
-		reader.ReadEndMap();
+        reader.ReadEndMap();
+
 		return obj;
 	}
 
 	private static readonly Type _listType = typeof(List<>);
 	private static object GetArray(CborReader reader, Type type)
 	{
-		reader.ReadStartArray();
+		var length = reader.ReadStartArray();
 
+		return length is null
+			? GetInDefiniteLengthArray(reader, type)
+			: GetDefiniteLengthArray(reader, type, length.Value);
+    }
+
+    private static object GetDefiniteLengthArray(CborReader reader, Type type, int length)
+	{
+        var elementType = type.GetElementType()
+            ?? throw new InvalidCastException("Cannot get array type");
+        var array = Array.CreateInstance(elementType, length);
+
+        var isNullable = elementType.IsClass || Nullable.GetUnderlyingType(elementType) != null;
+
+        for (var index = 0; index < length; index++)
+        {
+            var value = GetValue(
+                reader,
+                elementType
+            );
+
+            if (isNullable && value is null)
+            {
+				array.SetValue(null, index);
+            }
+            else if (value is not null)
+            {
+                array.SetValue(value, index);
+            }
+        }
+
+        // According to the spec this shouldn't be required,
+        // but on the microsoft implementation of the CBOR reader
+        // it still must be called on definite length arrays 😡
+        if (reader.PeekState() == CborReaderState.EndArray)
+        {
+            reader.ReadEndArray();
+        }
+        
+        return array;
+    }
+
+    private static object GetInDefiniteLengthArray(CborReader reader, Type type)
+    {
         var elementType = type.GetElementType()
             ?? throw new InvalidCastException("Cannot get array type");
         var listType = _listType.MakeGenericType(elementType);
-		var list = (System.Collections.IList) (
-			Activator.CreateInstance(listType)
-			?? throw new InvalidOperationException("Cannot create list")
-		);
+        var list = (System.Collections.IList)(
+            Activator.CreateInstance(listType)
+            ?? throw new InvalidOperationException("Cannot create list")
+        );
 
-		var isNullable = elementType.IsClass || Nullable.GetUnderlyingType(elementType) != null;
+        var isNullable = elementType.IsClass || Nullable.GetUnderlyingType(elementType) != null;
 
         while (reader.PeekState() != CborReaderState.EndArray)
-		{
-			var value = GetValue(
-				reader,
-				elementType
-			);
+        {
+            var value = GetValue(
+                reader,
+                elementType
+            );
 
-			if (isNullable && value is null)
-			{
-				list.Add(null);
-			}
-			else if (value is not null)
-			{
+            if (isNullable && value is null)
+            {
+                list.Add(null);
+            }
+            else if (value is not null)
+            {
                 list.Add(value);
             }
-		}
+        }
 
-		reader.ReadEndArray();
+        reader.ReadEndArray();
 
         var array = Array.CreateInstance(elementType, list.Count);
         list.CopyTo(array, 0);
 
         return array;
-	}
+    }
 
-	private static byte[] GetIndefiniteLengthByteString(CborReader reader)
+
+    private static byte[] GetIndefiniteLengthByteString(CborReader reader)
 	{
         reader.ReadStartIndefiniteLengthByteString();
 
@@ -183,13 +214,14 @@ public static class Cbor
 			CborReaderState.Boolean when type == typeof(bool) => reader.ReadBoolean(),
 			CborReaderState.ByteString when type == typeof(byte[]) => reader.ReadByteString(),
 			CborReaderState.DoublePrecisionFloat when type == typeof(double) => reader.ReadDouble(),
-			CborReaderState.HalfPrecisionFloat when type == typeof(Half) => reader.ReadHalf(),
-			CborReaderState.NegativeInteger when type == typeof(ulong) => reader.ReadCborNegativeIntegerRepresentation(),
-            CborReaderState.NegativeInteger when type == typeof(Int32) => reader.ReadInt32(),
-            CborReaderState.NegativeInteger when type == typeof(Int64) => reader.ReadInt64(),
+            CborReaderState.SinglePrecisionFloat when type == typeof(float) => reader.ReadSingle(),
+            CborReaderState.HalfPrecisionFloat when type == typeof(Half) => reader.ReadHalf(),
+			CborReaderState.NegativeInteger when type == typeof(Int16) => (Int16) reader.ReadCborNegativeIntegerRepresentation(),
+            CborReaderState.NegativeInteger when type == typeof(Int32) => (Int32) reader.ReadInt32(),
+            CborReaderState.NegativeInteger when type == typeof(Int64) => (Int64) reader.ReadInt64(),
             CborReaderState.Null => () => { reader.ReadNull(); return (object?) null; },
-            CborReaderState.SimpleValue when type == typeof(byte) || type == typeof(CborSimpleValue) => reader.ReadSimpleValue(),
-            CborReaderState.SinglePrecisionFloat => reader.ReadSingle(),
+            CborReaderState.SimpleValue when type == typeof(byte) => (byte) reader.ReadSimpleValue(),
+            CborReaderState.SimpleValue when type == typeof(CborSimpleValue) => reader.ReadSimpleValue(),
             CborReaderState.StartArray when type.IsArray => GetArray(reader, type),
             CborReaderState.StartIndefiniteLengthByteString => GetIndefiniteLengthByteString(reader),
             CborReaderState.StartIndefiniteLengthTextString => GetIndefiniteLengthTextString(reader),
